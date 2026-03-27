@@ -38,7 +38,7 @@ def publish_dataset(fs: FeatureStore, feature_views, conf: dict):
     dataset_name = conf["feature_store"]["dataset_name"]
 
     spine_sdf = feature_views[0].feature_df.group_by("CUSTOMER_ID").agg(
-        F.lit(datetime.now().strftime("%Y-%m-%d")).as_("ASOF_DATE")
+        F.lit(datetime.now().strftime("%Y-%m-%d %H:%M:%S")).as_("ASOF_DATE")
     )
 
     dataset = fs.generate_dataset(
