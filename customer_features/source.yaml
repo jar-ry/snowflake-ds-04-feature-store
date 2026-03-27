@@ -1,0 +1,9 @@
+---
+source_tables:
+  - CUSTOMERS
+  - PURCHASE_BEHAVIOR
+label_columns: MONTHLY_CUSTOMER_VALUE
+timestamp_column: BEHAVIOR_UPDATED_AT
+training_spine_table: CUSTOMERS
+desc: Customer value features from CUSTOMERS and PURCHASE_BEHAVIOR tables.
+model_category: regression

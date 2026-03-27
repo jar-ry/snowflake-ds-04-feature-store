@@ -1,0 +1,9 @@
+snowflake:
+  database: RETAIL_REGRESSION_DEMO
+  schema: DS
+  role: RETAIL_REGRESSION_DEMO_ROLE
+  warehouse: RETAIL_REGRESSION_DEMO_WH
+
+feature_store:
+  schema: FEATURE_STORE
+  dataset_name: TRAINING_DATASET
