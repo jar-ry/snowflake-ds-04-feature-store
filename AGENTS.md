@@ -43,14 +43,14 @@ Or use programmatically:
 
 ```python
 from feature_store_helper import FeatureStoreHelper
-helper = FeatureStoreHelper(session, "RETAIL_REGRESSION_DEMO", "FEATURE_STORE", "RETAIL_REGRESSION_DEMO_WH")
+helper = FeatureStoreHelper(session, "RETAIL_REGRESSION_DEMO", "FEATURE_STORE", "RETAIL_REGRESSION_DEMO_WH", source_schema="DS")
 helper.load_domain("customer_features")
 fs, registered_fvs = helper.register_all()
 ```
 
 ## Snowflake Connection
 
-`main.py` checks `SNOWFLAKE_CONNECTION_NAME` env var first, falls back to credentials in `parameters.yml`.
+`main.py` checks `SNOWFLAKE_CONNECTION_NAME` env var first. If not set, it reads `connection.json` from the project root (copy from `connection.json.example`) and merges those credentials with database/schema/role/warehouse from `parameters.yml`.
 
 ## Configuration
 
@@ -64,12 +64,13 @@ All config lives in `parameters.yml`:
 - **Database:** `RETAIL_REGRESSION_DEMO`
 - **Schemas:** `DS` (raw data), `FEATURE_STORE`
 - **Entity:** `CUSTOMER` (join key: `CUSTOMER_ID`)
-- **FeatureView:** `FV_PREPROCESS` (backed by Dynamic Table, 60-minute refresh)
+- **FeatureViews:** `FV_CUSTOMER_BASE`, `FV_CUSTOMER_DERIVED` (backed by Dynamic Tables, 60-minute refresh)
 - **Dataset:** `TRAINING_DATASET` (versioned, immutable)
 
 ## Architecture Notes
 
 - `feature_store_helper.py` dynamically discovers feature domain folders (e.g. `customer_features/`), imports their entities and feature modules, and registers everything.
+- `FeatureStoreHelper` accepts a `source_schema` parameter (defaults to the feature store schema). Source table lookups and feature view SQL use `source_schema`, while entity/FeatureView registration uses the feature store schema. This separates raw data (`DS`) from feature store objects (`FEATURE_STORE`).
 - Each domain folder is self-contained: `entities.py` defines entities with `get_all_entities()`, `source.yaml` declares source tables, and `features/*.py` each expose `create_draft_feature_view()`.
 - To add a new feature domain, create a new folder with the same structure and run `python main.py --domain <folder_name>`.
 - The spine DataFrame uses `strftime('%Y-%m-%d %H:%M:%S')` for the AS-OF date (not just `%Y-%m-%d`) to avoid midnight timestamp issues with point-in-time joins.

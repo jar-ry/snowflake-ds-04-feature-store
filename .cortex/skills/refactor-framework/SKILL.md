@@ -171,7 +171,8 @@ If errors occur, help debug by reading logs and tracing the issue back to the re
 
 - **Never hardcode values** — connection details go in `parameters.yml`, source tables in `source.yaml`
 - **Keep the domain pattern** — each domain is a self-contained folder with `entities.py`, `source.yaml`, and `features/`
-- **The `FeatureStoreHelper` is generic** — do not modify it unless adding new capabilities (it discovers domains dynamically)
+- **The `FeatureStoreHelper` is generic** — it accepts a `source_schema` parameter to separate raw data tables (e.g. `DS`) from the feature store schema (e.g. `FEATURE_STORE`). Source table lookups and feature view SQL use `source_schema`, while entity/FeatureView registration uses the feature store schema. Do not modify the helper unless adding new capabilities.
+- **Feature view SQL receives `source_schema`** — `create_draft_feature_view()` gets `database` and `schema` parameters where `schema` is the source schema, not the feature store schema. Reference source tables as `{database}.{schema}.TABLE_NAME`.
 - **Feature descriptions** in `.attach_feature_desc()` are optional but good practice
 - **`refresh_freq`** controls how often the Dynamic Table backing the FeatureView refreshes
 - **The Versioned Dataset is the contract** — the ML Training repo reads from it without knowing how features are computed

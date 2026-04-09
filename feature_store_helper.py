@@ -18,10 +18,11 @@ logger.setLevel(logging.INFO)
 
 
 class FeatureStoreHelper:
-    def __init__(self, session: Session, database: str, schema: str, warehouse: str) -> None:
+    def __init__(self, session: Session, database: str, schema: str, warehouse: str, source_schema: str | None = None) -> None:
         self._session = session
         self._database = database
         self._schema = schema
+        self._source_schema = source_schema or schema
         self._warehouse = warehouse
         self._clear()
 
@@ -56,11 +57,11 @@ class FeatureStoreHelper:
             self._timestamp_column = source_cfg["timestamp_column"]
         if "training_spine_table" in source_cfg:
             self._training_spine_table = (
-                f"{self._database}.{self._schema}.{source_cfg['training_spine_table']}"
+                f"{self._database}.{self._source_schema}.{source_cfg['training_spine_table']}"
             )
 
         for table_ref in source_cfg.get("source_tables", []):
-            fq_table = f"{self._database}.{self._schema}.{table_ref}"
+            fq_table = f"{self._database}.{self._source_schema}.{table_ref}"
             df = self._session.table(fq_table)
             self._source_tables.append(table_ref)
             self._source_dfs.append(df)
@@ -81,7 +82,7 @@ class FeatureStoreHelper:
             mod_path = f"{self._selected_domain}.features.{fname.removesuffix('.py')}"
             mod = importlib.import_module(mod_path)
             fv = mod.create_draft_feature_view(
-                self._session, self._source_dfs, self._source_tables, self._database, self._schema
+                self._session, self._source_dfs, self._source_tables, self._database, self._source_schema
             )
             fvs.append(fv)
         return fvs

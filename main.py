@@ -1,4 +1,5 @@
 import argparse
+import json
 import logging
 import os
 from datetime import datetime
@@ -20,8 +21,12 @@ def get_session(conf: dict) -> Session:
     if connection_name:
         session = Session.builder.config("connection_name", connection_name).create()
     else:
+        conn_file = Path(__file__).parent / "connection.json"
+        with open(conn_file) as f:
+            conn_cfg = json.load(f)
         session = Session.builder.configs(
             {
+                **conn_cfg,
                 "database": conf["snowflake"]["database"],
                 "schema": conf["snowflake"]["schema"],
                 "role": conf["snowflake"]["role"],
@@ -62,7 +67,8 @@ def main(domain: str = "customer_features"):
     fs_schema = conf["feature_store"]["schema"]
     wh = conf["snowflake"]["warehouse"]
 
-    helper = FeatureStoreHelper(session, db, fs_schema, wh)
+    source_schema = conf["snowflake"]["schema"]
+    helper = FeatureStoreHelper(session, db, fs_schema, wh, source_schema=source_schema)
 
     logger.info("Available feature domains:")
     helper.list_domains().show()
