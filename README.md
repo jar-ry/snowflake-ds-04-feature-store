@@ -39,7 +39,7 @@ To add a new feature domain, create a new folder with the same structure and `ma
 ```python
 from feature_store_helper import FeatureStoreHelper
 
-helper = FeatureStoreHelper(session, "RETAIL_REGRESSION_DEMO", "FEATURE_STORE", "RETAIL_REGRESSION_DEMO_WH")
+helper = FeatureStoreHelper(session, "RETAIL_REGRESSION_DEMO", "FEATURE_STORE", "RETAIL_REGRESSION_DEMO_WH", source_schema="DS")
 helper.list_domains()                           # Show available feature domains
 helper.load_domain("customer_features")         # Load source tables
 entities = helper.load_entities()               # Get Entity objects
@@ -57,6 +57,10 @@ python main.py --domain customer_features
 ## The Contract
 
 The **Versioned Dataset** is the interface between this repo and the ML Training repo. This repo publishes it; the training repo reads it. Neither repo imports code from the other.
+
+## Connection
+
+`main.py` checks the `SNOWFLAKE_CONNECTION_NAME` env var first. If not set, it reads `connection.json` from the project root (copy from `connection.json.example`) and merges those credentials with database/schema/role/warehouse from `parameters.yml`.
 
 ## Setup
 
